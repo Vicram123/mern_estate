@@ -1,58 +1,61 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../redux/user/userSlice"; // Import actions from the user slice
 
 export default function SignIn() {
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  // Local state to hold form data
+  const [formData, setFormData] = useState({});
 
+  // Get loading and error state from the Redux store
+  const { loading, error } = useSelector((state) => state.user);
+
+  // Hooks for navigation and dispatching actions
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  // Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
-
-    // Simple client-side validation
-    if (!formData.email || !formData.password) {
-      setError("All fields are required.");
-      return;
-    }
+    e.preventDefault(); // Prevent default form submission behavior
+    dispatch(signInStart()); // Dispatch action to indicate sign-in process has started
 
     try {
-      setLoading(true);
+      // Make a POST request to the sign-in API
       const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData), // Send form data as JSON
       });
 
-      const data = await res.json();
-      setLoading(false);
+      const data = await res.json(); // Parse the response
 
       if (data.success === false) {
-        setError(data.message);
+        // If sign-in fails, dispatch failure action with the error message
+        dispatch(signInFailure(data.message));
         return;
       }
 
-      setSuccess(true);
+      // If sign-in is successful, dispatch success action with user data
+      dispatch(signInSuccess(data));
+
+      // Redirect to home page after a short delay
       setTimeout(() => {
         navigate("/");
       }, 2000); // Redirect after 2 seconds
     } catch (error) {
-      setLoading(false);
-      setError(error.message);
+      // Dispatch failure action if an error occurs during the fetch
+      dispatch(signInFailure(error.message));
     }
   };
 
@@ -62,38 +65,33 @@ export default function SignIn() {
         <div className="text-3xl text-center font-semibold my-7">Sign In</div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
-            id="email"
+            id="email" // ID for the email input
             type="email"
             placeholder="email"
             className="border p-3 rounded-lg"
-            onChange={handleChange}
+            onChange={handleChange} // Update form data on change
           />
           <input
-            id="password"
+            id="password" // ID for the password input
             type="password"
             placeholder="password"
             className="border p-3 rounded-lg"
-            onChange={handleChange}
+            onChange={handleChange} // Update form data on change
           />
           <button
-            disabled={loading}
+            disabled={loading} // Disable button while loading
             className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
           >
             {loading ? "Loading..." : "Sign In"}
           </button>
         </form>
         <div className="flex gap-2 mt-5 ">
-          <p>Dont an account?</p>
+          <p>Dont have an account?</p>
           <Link to={"/sign-up"}>
             <span className="text-blue-700">Sign Up</span>
           </Link>
         </div>
-        {error && <p className="text-red-500 mt-5">{error}</p>}
-        {success && (
-          <p className="text-green-500 mt-5">
-            User created successfully! Redirecting...
-          </p>
-        )}
+        {error && <p className="text-red-500 mt-5">{error}</p>}{" "}
       </div>
     </>
   );

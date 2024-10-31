@@ -1,11 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
+import dotenv from "dotenv";
 
-// Load environment variables from .env file
 dotenv.config();
 
 // Connect to MongoDB
@@ -15,14 +14,19 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 const app = express();
+
+// Middleware to parse JSON
 app.use(express.json());
 
+// Define routes
 app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);
 
-app.listen(3000, () => {
-  console.log("Server listening on port 3000!");
-});
-
 // Error handling middleware
 app.use(errorHandler);
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}!`);
+});

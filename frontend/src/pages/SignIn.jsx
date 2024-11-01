@@ -6,6 +6,7 @@ import {
   signInSuccess,
   signInFailure,
 } from "../redux/user/userSlice"; // Import actions from the user slice
+import Oauth from "../components/Oauth";
 
 export default function SignIn() {
   // Local state to hold form data
@@ -26,9 +27,9 @@ export default function SignIn() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission behavior
-    dispatch(signInStart()); // Dispatch action to indicate sign-in process has started
 
     try {
+      dispatch(signInStart()); // Dispatch action to indicate sign-in process has started
       // Make a POST request to the sign-in API
       const res = await fetch("/api/auth/signin", {
         method: "POST",
@@ -39,7 +40,7 @@ export default function SignIn() {
       });
 
       const data = await res.json(); // Parse the response
-
+      console.log(data);
       if (data.success === false) {
         // If sign-in fails, dispatch failure action with the error message
         dispatch(signInFailure(data.message));
@@ -48,11 +49,7 @@ export default function SignIn() {
 
       // If sign-in is successful, dispatch success action with user data
       dispatch(signInSuccess(data));
-
-      // Redirect to home page after a short delay
-      setTimeout(() => {
-        navigate("/");
-      }, 2000); // Redirect after 2 seconds
+      navigate("/");
     } catch (error) {
       // Dispatch failure action if an error occurs during the fetch
       dispatch(signInFailure(error.message));
@@ -84,6 +81,7 @@ export default function SignIn() {
           >
             {loading ? "Loading..." : "Sign In"}
           </button>
+          <Oauth />
         </form>
         <div className="flex gap-2 mt-5 ">
           <p>Dont have an account?</p>
@@ -91,7 +89,7 @@ export default function SignIn() {
             <span className="text-blue-700">Sign Up</span>
           </Link>
         </div>
-        {error && <p className="text-red-500 mt-5">{error}</p>}{" "}
+        {error && <p className="text-red-500 mt-5">{error}</p>}
       </div>
     </>
   );

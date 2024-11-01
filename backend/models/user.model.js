@@ -19,6 +19,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6, // Minimum password length
     },
+    avatar: {
+      type: String,
+      default:
+        " https://media.istockphoto.com/id/1337144146/id/vektor/vektor-ikon-profil-avatar-default.jpg?s=170667a&w=0&k=20&c=26gXDTXAEo2w4aGtmzQSaNjWcU6wSBrKgGZ-CGYJIeo=",
+    },
   },
   { timestamps: true }
 );

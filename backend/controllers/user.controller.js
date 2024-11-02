@@ -1,5 +1,5 @@
 import express from "express";
-import { errorHandler } from "../middlewares/error.js";
+import { errorHandler } from "../middlewares/errorHandler.js";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 
@@ -8,18 +8,27 @@ export const signup = async (req, res, next) => {
 };
 
 export const updateUser = async (req, res, next) => {
-  // Check if the user is trying to update their own account
   if (req.user.id !== req.params.id) {
     return next(errorHandler(401, "You can only update your own account!"));
   }
 
   try {
-    // Hash the password if it is being updated
+    // Check if the email is being updated and if it already exists
+    if (req.body.email) {
+      const existingUser = await User.findOne({ email: req.body.email });
+      if (existingUser && existingUser._id.toString() !== req.params.id) {
+        return res
+          .status(400)
+          .json({ message: "Email already in use by another account." });
+      }
+    }
+
+    // Hash the password if it's being updated
     if (req.body.password) {
       req.body.password = bcrypt.hashSync(req.body.password, 10);
     }
 
-    // Update the user information in the database
+    // Update the user
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
@@ -39,4 +48,13 @@ export const updateUser = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+export const deleteUser = async (req, res, next) => {
+  if (req.user.id !== req.params.id)
+    return next(errorHandler(401, "You can only delete your own account!"));
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.clearCookie("access_token");
+    res.status(200).json("User has been deleted");
+  } catch (error) {}
 };

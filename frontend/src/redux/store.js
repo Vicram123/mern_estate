@@ -1,10 +1,11 @@
+// store.js
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import userReducer from "./user/userSlice"; // Corrected import name
 import { persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
 import persistStore from "redux-persist/es/persistStore";
 
-const rootReducer = combineReducers({ user: userReducer }); // Use the correct reducer name
+const rootReducer = combineReducers({ user: userReducer });
 
 const persistConfig = {
   key: "root",
@@ -14,12 +15,10 @@ const persistConfig = {
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// Create a Redux store using configureStore from Redux Toolkit
 export const store = configureStore({
-  reducer: persistedReducer, // Use the persisted reducer
-
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({ serializableCheck: false }), // Disable the serializable check for non-serializable values
+    getDefaultMiddleware({ serializableCheck: false }),
 });
 
 export const persistor = persistStore(store);

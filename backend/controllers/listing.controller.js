@@ -1,3 +1,4 @@
+import { errorHandler } from "../middlewares/error.js";
 import Listing from "../models/listing.model.js";
 import User from "../models/user.model.js";
 
@@ -31,5 +32,29 @@ export const createListing = async (req, res, next) => {
     }
     console.error(error);
     next(error);
+  }
+};
+
+export const deleteListing = async (req, res, next) => {
+  try {
+    const listing = await Listing.findById(req.params.id);
+
+    // Check if the listing exists
+    if (!listing) {
+      return next(errorHandler(404, "Listing not found!"));
+    }
+
+    // Check if the user is authorized to delete the listing
+    if (req.user.id !== listing.userRef.toString()) {
+      return next(errorHandler(401, "You can only delete your own listing"));
+    }
+
+    // Delete the listing
+    await Listing.findByIdAndDelete(req.params.id);
+
+    // Send success response
+    return res.status(200).json({ message: "Listing has been deleted" });
+  } catch (error) {
+    next(error); // Pass any errors to the error handling middleware
   }
 };

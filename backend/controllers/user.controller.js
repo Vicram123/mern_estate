@@ -1,7 +1,7 @@
-import express from "express";
-import { errorHandler } from "../middlewares/errorHandler.js";
+import { errorHandler } from "../middlewares/error.js";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
+import Listing from "../models/listing.model.js";
 
 export const signup = async (req, res, next) => {
   res.json({ message: "working" });
@@ -57,4 +57,19 @@ export const deleteUser = async (req, res, next) => {
     res.clearCookie("access_token");
     res.status(200).json("User has been deleted");
   } catch (error) {}
+};
+
+export const getUserListings = async (req, res, next) => {
+  try {
+    if (req.user.id === req.params.id) {
+      const listings = await Listing.find({ userRef: req.params.id });
+      return res.status(200).json(listings);
+    } else {
+      return next(
+        errorHandler(401, "You can only view your own user listings!")
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
 };

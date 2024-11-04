@@ -24,3 +24,5 @@ npm install react-redux
 npm install redux-persist
 
 npm install firebase
+
+npm i swiper

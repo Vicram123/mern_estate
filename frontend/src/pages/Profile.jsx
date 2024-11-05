@@ -59,7 +59,9 @@ export default function Profile() {
     const xhr = new XMLHttpRequest();
     xhr.open(
       "POST",
-      `https://api.cloudinary.com/v1_1/desvmqruq/image/upload`,
+      `https://api.cloudinary.com/v1_1/${
+        import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+      }/image/upload`,
       true
     );
 
